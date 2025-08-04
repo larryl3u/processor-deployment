@@ -1,0 +1,6 @@
+apiVersion: v2
+name: movement
+description: Helm chart for Movement full node
+type: application
+version: 0.1.0
+appVersion: "latest"

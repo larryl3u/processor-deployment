@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "movement.fullname" . }}
+  labels:
+    app: {{ include "movement.name" . }}
+spec:
+  serviceName: {{ include "movement.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "movement.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "movement.name" . }}
+    spec:
+      initContainers:
+        - name: copy-config
+          image: busybox
+          command: ["sh", "-c", "cp /tmp/config.json /.movement/config.json"]
+          volumeMounts:
+            - name: config-volume
+              mountPath: /tmp/config.json
+              subPath: config.json
+            - name: movement-data
+              mountPath: /.movement
+      containers:
+        - name: movement-full-node
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["run"]
+          env:
+            - name: DOT_MOVEMENT_PATH
+              value: {{ .Values.env.dotMovementPath | quote }}
+            - name: MOVEMENT_TIMING
+              value: {{ .Values.env.movementTiming | quote }}
+            - name: RUST_BACKTRACE
+              value: {{ .Values.env.rustBacktrace | quote }}
+          ports:
+            - containerPort: {{ .Values.ports.api }}
+            - containerPort: {{ .Values.ports.p2p }}
+            - containerPort: {{ .Values.ports.metrics }}
+          volumeMounts:
+            - name: movement-data
+              mountPath: {{ .Values.volume.mountPath }}
+            - name: config-volume
+              mountPath: /tmp/config.json
+              subPath: config.json
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ .Values.livenessProbe.port }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+      volumes:
+      - name: movement-data
+        {{- if .Values.volume.emptyDir }}
+        emptyDir: {}
+        {{- else }}
+        persistentVolumeClaim:
+          claimName: movement-data
+        {{- end }}
+      - name: config-volume
+        configMap:
+          name: {{ include "movement.fullname" . }}-config

@@ -1,0 +1,24 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/movementlabsxyz/movement-full-node
+  tag: f236944
+  pullPolicy: IfNotPresent
+
+env:
+  dotMovementPath: /.movement
+  movementTiming: info
+  rustBacktrace: "1"
+
+ports:
+  api: 30731
+  p2p: 30734
+  metrics: 9464
+
+volume:
+  mountPath: /.movement
+  emptyDir: true  # set to false to use a PVC
+
+livenessProbe:
+  path: /v1
+  port: 30731
