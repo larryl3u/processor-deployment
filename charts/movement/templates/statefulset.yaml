@@ -16,6 +16,12 @@ spec:
         app: {{ include "movement.name" . }}
     spec:
       initContainers:
+        - name: check-movement-empty
+          image: alpine:latest
+          command: ["sh", "-c", "if [ -z \"$(ls -A /.movement 2>/dev/null)\" ]; then echo 'Installing dependencies...'; apk add --no-cache curl bash restic aws-cli; echo 'Running restic restore...'; curl -sSL https://raw.githubusercontent.com/movementlabsxyz/movement/main/docs/movement-node/run-fullnode/scripts/mainnet/restic-restore.sh | bash; else echo '/.movement is not empty, skipping restore'; fi"]
+          volumeMounts:
+            - name: movement-data
+              mountPath: /.movement
         - name: copy-config
           image: busybox
           command: ["sh", "-c", "cp /tmp/config.json /.movement/config.json"]
@@ -50,6 +56,7 @@ spec:
             - name: config-volume
               mountPath: /tmp/config.json
               subPath: config.json
+          {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
               path: {{ .Values.livenessProbe.path }}
@@ -59,6 +66,7 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 5
+          {{- end }}
       volumes:
       - name: movement-data
         {{- if .Values.volume.emptyDir }}

@@ -13,7 +13,7 @@ spec:
     - port: 30734
       targetPort: {{ .Values.ports.grpc }}
       name: grpc
-    - port: 9464
+    - port: 30735
       targetPort: {{ .Values.ports.metrics }}
       name: metrics
   selector:

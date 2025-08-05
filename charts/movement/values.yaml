@@ -13,12 +13,14 @@ env:
 ports:
   api: 30731
   grpc: 30734
-  metrics: 9464
+  metrics: 30735
 
 volume:
   mountPath: /.movement
-  emptyDir: true  # set to false to use a PVC
+  emptyDir: false  # set to false to use a PVC
+  storageClass: ""  # leave empty to use default storage class, or specify your preferred storage class
 
 livenessProbe:
-  path: /v1
+  enabled: false  # set to true to enable liveness probe
+  path: /health
   port: 30731
