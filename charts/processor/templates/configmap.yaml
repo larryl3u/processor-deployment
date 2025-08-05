@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "processor.fullname" . }}-config
+data:
+{{- range .Values.processors }}
+  {{ .name }}.json: |
+    {
+      "maptos_config": {
+        "indexer_processor_v2": {
+          "postgres_connection_string": "{{ .connection_string }}",
+          "maptos_indexer_grpc_listen_hostname": "{{ .grpc_hostname }}",
+          "additional_config": {{ .additional_config | toJson }},
+          "processor_name": "{{ .processor_name }}",
+          "maptos_indexer_grpc_listen_port": 30734,
+          "metrics_config": {
+            "metrics_listen_hostname": "0.0.0.0",
+            "metrics_listen_port": 9464
+          },
+          "health_config": {
+            "health_listen_hostname": "0.0.0.0",
+            "health_listen_port": 9465
+          }
+        }
+      }
+    }
+{{- end }}

@@ -1,0 +1,44 @@
+{{- range .Values.processors }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ .name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}
+    spec:
+      initContainers:
+      - name: copy-config
+        image: busybox
+        command: ["sh", "-c", "mkdir -p /.movement && cp /tmp/config.json /.movement/config.json"]
+        volumeMounts:
+          - name: config-volume
+            mountPath: /tmp/config.json
+            subPath: config.json
+      containers:
+        - name: {{ .name }}
+          image: {{ $.Values.image.repository }}:{{ $.Values.image.tag }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          env:
+            - name: DOT_MOVEMENT_PATH
+              value: "/.movement"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /tmp/config.json
+              subPath: {{ .name }}.json
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "processor.fullname" $ }}-config
+            items:
+              - key: {{ .name }}.json
+                path: config.json
+{{- end }}

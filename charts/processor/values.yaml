@@ -1,0 +1,17 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/movementlabsxyz/movement-indexer-v2
+  tag: a4e526b
+  pullPolicy: IfNotPresent
+
+resources: {}
+
+processorConfigMountPath: "/.movement"
+
+processors:
+  - name: default-processor
+    processor_name: default_processor
+    connection_string: "postgresql://postgres:password@postgres-pg:5432/postgres"
+    grpc_hostname: "movement-movement-local"
+    additional_config: {}

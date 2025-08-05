@@ -19,7 +19,7 @@
             "genesis_block_hash_hex": "25112f5405bbc65b2542a67d94094f12f4d2e287025480efcdb6200c5fed8671",
             "known_framework_release_str": "elsa",
             "dont_increase_epoch_until_version": 0,
-            "enable_indexer_grpc ": true
+            "enable_indexer_grpc": true
         },
         "indexer": {
             "maptos_indexer_grpc_listen_hostname": "0.0.0.0",

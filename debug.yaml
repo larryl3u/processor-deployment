@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: processors
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2025-08-05T00:36:34Z"
+  generation: 1
+  labels:
+    app: default-processor
+    app.kubernetes.io/managed-by: Helm
+  name: default-processor
+  namespace: default
+  resourceVersion: "7313"
+  uid: 3f7453d5-930b-45b0-b230-2747f852a7ac
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: default-processor
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: default-processor
+    spec:
+      containers:
+      - env:
+        - name: DOT_MOVEMENT_PATH
+          value: /.movement
+        image: ghcr.io/movementlabsxyz/movement-indexer-v2:f236944
+        imagePullPolicy: IfNotPresent
+        name: default-processor
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /.movement/config.json
+          name: config-volume
+          subPath: default-processor.json
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /.movement
+          type: ""
+        name: processor-config
+      - configMap:
+          defaultMode: 420
+          name: processors-processor-config
+        name: config-volume
+status:
+  conditions:
+  - lastTransitionTime: "2025-08-05T00:36:34Z"
+    lastUpdateTime: "2025-08-05T00:36:34Z"
+    message: Deployment does not have minimum availability.
+    reason: MinimumReplicasUnavailable
+    status: "False"
+    type: Available
+  - lastTransitionTime: "2025-08-05T00:36:34Z"
+    lastUpdateTime: "2025-08-05T00:36:34Z"
+    message: ReplicaSet "default-processor-66c7cbcbdc" is progressing.
+    reason: ReplicaSetUpdated
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  replicas: 1
+  unavailableReplicas: 1
+  updatedReplicas: 1
