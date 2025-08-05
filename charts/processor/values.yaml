@@ -13,5 +13,5 @@ processors:
   - name: default-processor
     processor_name: default_processor
     connection_string: "postgresql://postgres:password@postgres-pg:5432/postgres"
-    grpc_hostname: "movement-movement-local"
+    grpc_hostname: "movement-movement.default.svc.cluster.local"
     additional_config: {}
