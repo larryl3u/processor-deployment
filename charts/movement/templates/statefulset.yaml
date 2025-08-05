@@ -18,7 +18,7 @@ spec:
       initContainers:
         - name: check-movement-empty
           image: alpine:latest
-          command: ["sh", "-c", "if [ -z \"$(ls -A /.movement 2>/dev/null)\" ]; then echo 'Installing dependencies...'; apk add --no-cache curl bash restic aws-cli; echo 'Running restic restore...'; curl -sSL https://raw.githubusercontent.com/movementlabsxyz/movement/main/docs/movement-node/run-fullnode/scripts/mainnet/restic-restore.sh | bash; else echo '/.movement is not empty, skipping restore'; fi"]
+          command: ["sh", "-c", "if [ -z \"$(ls -A /.movement 2>/dev/null)\" ]; then echo 'Installing dependencies...'; apk add --no-cache curl bash restic aws-cli; echo 'Running restic restore...'; export HOME=/; export DOT_MOVEMENT_PATH=/.movement; curl -sSL https://raw.githubusercontent.com/movementlabsxyz/movement/main/docs/movement-node/run-fullnode/scripts/mainnet/restic-restore.sh | bash; else echo '/.movement is not empty, skipping restore'; fi"]
           volumeMounts:
             - name: movement-data
               mountPath: /.movement
