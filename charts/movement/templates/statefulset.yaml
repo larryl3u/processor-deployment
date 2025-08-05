@@ -38,9 +38,12 @@ spec:
             - name: RUST_BACKTRACE
               value: {{ .Values.env.rustBacktrace | quote }}
           ports:
-            - containerPort: {{ .Values.ports.api }}
-            - containerPort: {{ .Values.ports.p2p }}
-            - containerPort: {{ .Values.ports.metrics }}
+            - name: api
+              containerPort: {{ .Values.ports.api }}
+            - name: grpc
+              containerPort: {{ .Values.ports.grpc }}
+            - name: metrics
+              containerPort: {{ .Values.ports.metrics }}
           volumeMounts:
             - name: movement-data
               mountPath: {{ .Values.volume.mountPath }}

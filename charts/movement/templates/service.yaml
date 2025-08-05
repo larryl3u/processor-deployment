@@ -11,8 +11,8 @@ spec:
       targetPort: {{ .Values.ports.api }}
       name: api
     - port: 30734
-      targetPort: {{ .Values.ports.p2p }}
-      name: p2p
+      targetPort: {{ .Values.ports.grpc }}
+      name: grpc
     - port: 9464
       targetPort: {{ .Values.ports.metrics }}
       name: metrics

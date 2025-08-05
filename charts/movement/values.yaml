@@ -12,7 +12,7 @@ env:
 
 ports:
   api: 30731
-  p2p: 30734
+  grpc: 30734
   metrics: 9464
 
 volume:
