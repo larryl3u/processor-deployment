@@ -15,3 +15,13 @@ processors:
     connection_string: "postgresql://postgres:password@postgres-pg:5432/postgres"
     grpc_hostname: "movement-movement.default.svc.cluster.local"
     additional_config: {}
+  - name: token-v2-processor
+    processor_name: token_v2_processor
+    connection_string: "postgresql://postgres:password@postgres-pg:5432/postgres"
+    grpc_hostname: "movement-movement.default.svc.cluster.local"
+    additional_config: {}
+  - name: fungible-asset-processor
+    processor_name: fungible_asset_processor
+    connection_string: "postgresql://postgres:password@postgres-pg:5432/postgres"
+    grpc_hostname: "movement-movement.default.svc.cluster.local"
+    additional_config: {}
