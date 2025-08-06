@@ -9,7 +9,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 200Gi
+      storage: 1Ti
   {{- if .Values.volume.storageClass }}
   storageClassName: {{ .Values.volume.storageClass }}
   {{- end }} 
