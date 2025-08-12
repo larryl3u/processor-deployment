@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dist/main.js",
   "types": "dist/types/main.d.ts",
-  "license": "Apache-2.0",
+  "license": "MPL-2.0",
   "private": true,
   "scripts": {
     "help": "npx ts-node main.ts --help",
