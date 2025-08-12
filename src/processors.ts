@@ -1,11 +1,12 @@
 import { Construct } from 'constructs';
-import { Chart, ChartProps } from 'cdk8s';
+import { Chart } from 'cdk8s';
 import * as kplus from 'cdk8s-plus-30';
 import { ProcessorsConfig } from './types';
+import { EnvInfo } from './types/env';
 
 export class ProcessorChart extends Chart {
-  constructor(scope: Construct, id: string, config: ProcessorsConfig, props: ChartProps = {}) {
-    super(scope, id, props);
+  constructor(scope: Construct, id: string, envMeta: EnvInfo, config: ProcessorsConfig) {
+    super(scope, id);
 
     config.processors.forEach((processorConfig) => {
       const configMap = new kplus.ConfigMap(this, `${processorConfig.name}-config`, {

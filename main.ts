@@ -49,9 +49,9 @@ const envMeta: EnvInfo = require(`./src/env/${envId}/env.ts`).envInfo;
 // Load configurations using the config loader
 const configs = loadConfig(envMeta);
 
-new MovementChart(app, `movement-${envId}`, configs.fullnode);
-new PostgresChart(app, `postgres-${envId}`, configs.postgres);
-new ProcessorChart(app, `processor-${envId}`, configs.indexer);
+new MovementChart(app, `movement-${envId}`, envMeta, configs.fullnode);
+new PostgresChart(app, `postgres-${envId}`, envMeta, configs.postgres);
+new ProcessorChart(app, `processor-${envId}`, envMeta, configs.indexer);
 
 app.synth();
 

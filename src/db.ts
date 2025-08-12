@@ -1,11 +1,12 @@
 import { Construct } from 'constructs';
-import { Chart, ChartProps, ApiObject } from 'cdk8s';
+import { Chart, ApiObject } from 'cdk8s';
 import * as kplus from 'cdk8s-plus-30';
 import { PostgresConfig } from './types';
+import { EnvInfo } from './types/env';
 
 export class PostgresChart extends Chart {
-  constructor(scope: Construct, id: string, config: PostgresConfig, props: ChartProps = {}) {
-    super(scope, id, props);
+  constructor(scope: Construct, id: string, envMeta: EnvInfo, config: PostgresConfig) {
+    super(scope, id);
 
     const pvcName = 'postgres-data';
     new ApiObject(this, 'postgres-data', {

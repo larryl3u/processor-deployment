@@ -1,9 +1,12 @@
 import { Construct } from 'constructs';
-import { Chart, ChartProps, Size } from 'cdk8s';
+import { Chart, Size } from 'cdk8s';
 import * as kplus from 'cdk8s-plus-30';
 import { MovementConfig } from './types';
 import { MovementConfigJson } from './types/movement-config';
 import { movementConfigTemplate } from './config/movement-config';
+import * as fs from 'fs';
+import * as path from 'path';
+import { EnvInfo } from './types/env';
 
 function buildMovementConfigJson(config: MovementConfig) {
   const base: MovementConfigJson = (config.configJson as MovementConfigJson) ?? movementConfigTemplate;
@@ -21,11 +24,13 @@ function buildMovementConfigJson(config: MovementConfig) {
   return merged;
 }
 
-const restoreScript = `#!/bin/bash\nset -e\n\necho "Installing dependencies..."\napk add --no-cache curl bash restic aws-cli\n\n# Check if any file is under /.movement; if yes, skip the restic restore\nif [ -n "$(ls -A /.movement 2>/dev/null)" ]; then\n    echo "/.movement is not empty, skipping restore"\n    exit 0\nfi\n\necho "Running restic restore..."\nexport HOME=/\nexport DOT_MOVEMENT_PATH=/.movement\n\n# Download and run the restic restore script\ncurl -sSL https://raw.githubusercontent.com/movementlabsxyz/movement/main/docs/movement-node/run-fullnode/scripts/mainnet/restic-restore.sh | bash\n\n# Restored files are under /.movement/.movement, move them up one level\nif [ -d /.movement/.movement ]; then\n    mv /.movement/.movement/* /.movement/ 2>/dev/null || true\n    rmdir /.movement/.movement 2>/dev/null || true\n    echo "Files moved successfully"\nelse\n    echo "No nested directory found, files are already in correct location"\nfi\n\necho "Restore completed!"`;
+// Read the restore script from file
+const restoreScript = fs.readFileSync(path.join(__dirname, 'scripts', 'restore.sh'), 'utf8');
 
 export class MovementChart extends Chart {
-  constructor(scope: Construct, id: string, config: MovementConfig, props: ChartProps = {}) {
-    super(scope, id, props);
+  constructor(scope: Construct, id: string, envMeta: EnvInfo, config: MovementConfig) {
+    super(scope, id);
+    const networkName = envMeta.networkName;
 
     const configMap = new kplus.ConfigMap(this, 'movement-config', {
       metadata: { name: 'movement-config' },
@@ -69,22 +74,27 @@ export class MovementChart extends Chart {
     const restoreVolume = kplus.Volume.fromConfigMap(this, 'restore-script-vol', restoreScriptConfigMap);
     const configVolume = kplus.Volume.fromConfigMap(this, 'config-vol', configMap);
 
+    // Init container 1: Restore data if needed
     statefulSet.addInitContainer({
-      name: 'check-movement-empty',
+      name: 'restore-if-needed',
       image: 'alpine:latest',
-      command: ['sh', '-c'],
-      args: ['if [ -z "$(ls -A /.movement 2>/dev/null)" ]; then sh /tmp/restore.sh; else echo "/.movement is not empty, skipping restore"; fi'],
+      command: ['/bin/sh'],
+      args: ['/tmp/restore.sh', networkName],
       volumeMounts: [
         { path: '/.movement', volume: dataVolume },
         { path: '/tmp/restore.sh', volume: restoreVolume, subPath: 'restore.sh' },
       ],
     });
 
+    // Init container 2: Copy configuration files
     statefulSet.addInitContainer({
-      name: 'copy-config',
-      image: 'busybox',
-      command: ['sh', '-c'],
-      args: ['cp /tmp/config.json /.movement/config.json'],
+      name: 'copy-movement-config',
+      image: 'busybox:latest',
+      command: ['/bin/sh'],
+      args: [
+        '-c',
+        'cp /tmp/config.json /.movement/config.json && echo "Configuration copied successfully"'
+      ],
       volumeMounts: [
         { path: '/tmp/config.json', volume: configVolume, subPath: 'config.json' },
         { path: '/.movement', volume: dataVolume },
