@@ -1,31 +1,30 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "commonjs",
+    "module": "CommonJS",
     "lib": ["ES2022"],
-    "declaration": true,
+    "outDir": "./dist",
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": false,
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
-    "typeRoots": ["./node_modules/@types"],
-    "outDir": "./dist"
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    // Load json config files.s
+    "resolveJsonModule": true,
   },
   "include": [
     "main.ts",
-    "src/**/*.ts"
+    "src/**/*.ts",
+    ".gen/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist"
-  ]
+    "dist",
+    "cdktf.out"
+  ],
+  "ts-node": {
+    "esm": false,
+  }
 }
