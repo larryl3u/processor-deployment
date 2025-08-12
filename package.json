@@ -11,23 +11,22 @@
     "get": "cdktf get",
     "compile": "tsc --build",
     "watch": "tsc --build -w",
-    "build": "pnpm run clean && pnpm run get && pnpm run compile && pnpm run k8s:synth:testnet",
     
-    "k8s:synth:testnet": "cdktf synth --target=kubernetes_testnet",
-    "k8s:synth:devnet": "cdktf synth --target=kubernetes_devnet", 
-    "k8s:synth:mainnet": "cdktf synth --target=kubernetes_mainnet",
+    "build:testnet": "pnpm run clean && pnpm run get && pnpm run compile && cdktf synth --target=indexer_testnet",
+    "build:devnet": "pnpm run clean && pnpm run get && pnpm run compile && cdktf synth --target=indexer_devnet",
+    "build:mainnet": "pnpm run clean && pnpm run get && pnpm run compile && cdktf synth --target=indexer_mainnet",
     
-    "k8s:deploy:testnet": "cdktf deploy --target=kubernetes_testnet",
-    "k8s:deploy:devnet": "cdktf deploy --target=kubernetes_devnet",
-    "k8s:deploy:mainnet": "cdktf deploy --target=kubernetes_mainnet",
+    "deploy:testnet": "pnpm run build:testnet && cdktf deploy --target=indexer_testnet",
+    "deploy:devnet": "pnpm run build:devnet && cdktf deploy --target=indexer_devnet",
+    "deploy:mainnet": "pnpm run build:mainnet && cdktf deploy --target=indexer_mainnet",
     
-    "k8s:destroy:testnet": "cdktf destroy --target=kubernetes_testnet",
-    "k8s:destroy:devnet": "cdktf destroy --target=kubernetes_devnet", 
-    "k8s:destroy:mainnet": "cdktf destroy --target=kubernetes_mainnet",
+    "diff:testnet": "pnpm run build:testnet && cdktf diff --target=indexer_testnet",
+    "diff:devnet": "pnpm run build:devnet && cdktf diff --target=indexer_devnet",
+    "diff:mainnet": "pnpm run build:mainnet && cdktf diff --target=indexer_mainnet",
     
-    "k8s:diff:testnet": "cdktf diff --target=kubernetes_testnet",
-    "k8s:diff:devnet": "cdktf diff --target=kubernetes_devnet",
-    "k8s:diff:mainnet": "cdktf diff --target=kubernetes_mainnet"
+    "destroy:testnet": "cdktf destroy --target=indexer_testnet",
+    "destroy:devnet": "cdktf destroy --target=indexer_devnet",
+    "destroy:mainnet": "cdktf destroy --target=indexer_mainnet"
   },
   "dependencies": {
     "cdktf": "^0.21.0",
@@ -36,9 +35,9 @@
     "yargs": "^18.0.0"
   },
   "devDependencies": {
-    "@types/node": "^14",
+    "@types/node": "^20",
     "@types/yargs": "^17.0.33",
-    "ts-node": "^10",
-    "typescript": "^4.9.5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
