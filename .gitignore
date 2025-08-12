@@ -9,17 +9,10 @@ node_modules/
 .pnp
 .pnp.js
 
-# CDK8s generated files
-cdk.out/
-
 # CDKTF generated files
 dist/
 cdktf.out/
 .gen/
-
-# Test coverage
-coverage/
-*.lcov
 
 # Runtime and logs
 *.log
@@ -36,46 +29,6 @@ lerna-debug.log*
 .env.test
 .env.*.local
 
-# IDE and Editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.vscode/settings.json
-.vscode/tasks.json
-.vscode/launch.json
-.vscode/extensions.json
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Temporary files
-tmp/
-temp/
-.tmp/
-
-# Package manager lock files (keep pnpm-lock.yaml)
-package-lock.json
-yarn.lock
-
-# Build artifacts
-build/
-out/
-
-# CDK8s specific
-cdk8s.yaml
-cdk8s.out/
-
-# Jest
-.nyc_output
-__snapshots__/
 
 # TypeScript
 *.tsbuildinfo
@@ -84,16 +37,8 @@ __snapshots__/
 *.kubeconfig
 kubeconfig
 
-# Helm
-charts/*/charts/
-charts/*/requirements.lock
-
 # Terraform (if used)
 *.tfstate
 *.tfstate.*
 .terraform/
 .terraform.lock.hcl
-
-# Local development
-.local/
-local/
