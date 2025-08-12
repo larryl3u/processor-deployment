@@ -1,59 +1,27 @@
-import { App } from 'cdk8s';
-import { MovementChart } from './src/node';
-import { PostgresChart } from './src/db';
-import { ProcessorChart } from './src/processors';
-import { loadConfig } from './src/utils/config_loader';
-import { EnvInfo } from './src/types/env';
-import * as yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
-import { VALID_ENVIRONMENTS } from './src/const';
+#!/usr/bin/env node
+import { App, TerraformStack } from "cdktf";
+import { Construct } from "constructs";
+import { MovementFullnodeConstruct } from "./src/constructs/movement-fullnode";
 
-export { MovementChart } from './src/node';
-export { PostgresChart } from './src/db';
-export { ProcessorChart } from './src/processors';
+// Import environment configurations
+import { envInfo as testnetEnv } from "./src/env/testnet";
+import { envInfo as devnetEnv } from "./src/env/devnet";
+import { envInfo as mainnetEnv } from "./src/env/mainnet";
 
-// Parse CLI arguments using yargs
-const argv = yargs(hideBin(process.argv))
-  .option('env', {
-    type: 'string',
-    describe: 'Environment to deploy to',
-    choices: VALID_ENVIRONMENTS,
-    demandOption: true
-  })
-  .help()
-  .alias('h', 'help')
-  .version()
-  .alias('v', 'version')
-  .parseSync();
+class MovementStack extends TerraformStack {
+  constructor(scope: Construct, id: string, envInfo: any) {
+    super(scope, id);
+
+    // Create Movement fullnode construct with unique ID
+    new MovementFullnodeConstruct(this, `movement-${envInfo.networkName}`, envInfo);
+  }
+}
 
 const app = new App();
 
-// Load context from CLI flags into the cdk8s App context
-const cliCtx: Record<string, string> = {};
-
-// Add main options to context
-cliCtx.env = argv.env;
-
-// Load context into the cdk8s App
-for (const [key, value] of Object.entries(cliCtx)) {
-  app.node.setContext(key, value);
-}
-
-// Resolve environment and cluster
-const envId: string = app.node.tryGetContext('env') ?? 'devnet-staging';
-
-// Load environment metadata
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const envMeta: EnvInfo = require(`./src/env/${envId}/env.ts`).envInfo;
-
-// Load configurations using the config loader
-const configs = loadConfig(envMeta);
-
-new MovementChart(app, `movement-${envId}`, envMeta, configs.fullnode);
-new PostgresChart(app, `postgres-${envId}`, envMeta, configs.postgres);
-new ProcessorChart(app, `processor-${envId}`, envMeta, configs.indexer);
+// Create stacks for each environment
+new MovementStack(app, "kubernetes_testnet", testnetEnv);
+new MovementStack(app, "kubernetes_devnet", devnetEnv);
+new MovementStack(app, "kubernetes_mainnet", mainnetEnv);
 
 app.synth();
-
-console.log('Successfully generated Kubernetes manifests!');
-console.log(`   Environment: ${envId}`);

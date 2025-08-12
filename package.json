@@ -1,40 +1,43 @@
 {
-  "name": "cdk8s",
+  "name": "movement-fullnode",
   "version": "1.0.0",
   "main": "dist/main.js",
   "types": "dist/types/main.d.ts",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "import": "cdk8s import",
     "help": "npx ts-node main.ts --help",
-    "synth:testnet": "npx ts-node main.ts --env=testnet-staging",
-    "synth:devnet": "npx ts-node main.ts --env=devnet-staging",
-    "synth:mainnet": "npx ts-node main.ts --env=mainnet-prod",
-    "deploy:testnet": "pnpm run synth:testnet && kubectl --context=indexer-staging apply -f dist/",
-    "deploy:devnet": "pnpm run synth:devnet && kubectl --context=indexer-staging apply -f dist/",
-    "deploy:mainnet": "pnpm run synth:mainnet && kubectl --context=indexer-prod apply -f dist/",
+    "clean": "rm -rf dist/ cdktf.out/ .gen/",
+    "get": "cdktf get",
     "compile": "tsc --build",
     "watch": "tsc --build -w",
-    "test": "jest",
-    "build": "pnpm run test && pnpm run synth:testnet",
-    "upgrade": "pnpm add cdk8s@latest cdk8s-cli@latest",
-    "upgrade:next": "pnpm add cdk8s@next cdk8s-cli@next"
+    "build": "pnpm run clean && pnpm run get && pnpm run compile && pnpm run k8s:synth:testnet",
+    
+    "k8s:synth:testnet": "cdktf synth --target=kubernetes_testnet",
+    "k8s:synth:devnet": "cdktf synth --target=kubernetes_devnet", 
+    "k8s:synth:mainnet": "cdktf synth --target=kubernetes_mainnet",
+    
+    "k8s:deploy:testnet": "cdktf deploy --target=kubernetes_testnet",
+    "k8s:deploy:devnet": "cdktf deploy --target=kubernetes_devnet",
+    "k8s:deploy:mainnet": "cdktf deploy --target=kubernetes_mainnet",
+    
+    "k8s:destroy:testnet": "cdktf destroy --target=kubernetes_testnet",
+    "k8s:destroy:devnet": "cdktf destroy --target=kubernetes_devnet", 
+    "k8s:destroy:mainnet": "cdktf destroy --target=kubernetes_mainnet",
+    
+    "k8s:diff:testnet": "cdktf diff --target=kubernetes_testnet",
+    "k8s:diff:devnet": "cdktf diff --target=kubernetes_devnet",
+    "k8s:diff:mainnet": "cdktf diff --target=kubernetes_mainnet"
   },
   "dependencies": {
-    "cdk8s": "^2.70.6",
-    "cdk8s-plus-28": "^2.5.6",
-    "cdk8s-plus-30": "^2.4.9",
+    "cdktf": "^0.21.0",
     "constructs": "^10.4.2",
+    "@cdktf/provider-kubernetes": "^12.1.0",
     "yargs": "^18.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^27",
     "@types/node": "^14",
     "@types/yargs": "^17.0.33",
-    "cdk8s-cli": "^2.200.149",
-    "jest": "^27",
-    "ts-jest": "^27",
     "ts-node": "^10",
     "typescript": "^4.9.5"
   }

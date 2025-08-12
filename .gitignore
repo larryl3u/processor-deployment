@@ -10,8 +10,12 @@ node_modules/
 .pnp.js
 
 # CDK8s generated files
-dist/
 cdk.out/
+
+# CDKTF generated files
+dist/
+cdktf.out/
+.gen/
 
 # Test coverage
 coverage/
