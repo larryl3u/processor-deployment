@@ -6,10 +6,7 @@ import { PersistentVolumeClaim } from "../../.gen/providers/kubernetes/persisten
 import { StatefulSet } from "../../.gen/providers/kubernetes/stateful-set";
 import { Service } from "../../.gen/providers/kubernetes/service";
 import { ConfigMap } from "../../.gen/providers/kubernetes/config-map";
-import { ServiceAccount } from "../../.gen/providers/kubernetes/service-account";
-import { Role } from "../../.gen/providers/kubernetes/role";
-import { RoleBinding } from "../../.gen/providers/kubernetes/role-binding";
-import { EnvInfo } from "../env";
+import type { EnvInfo } from "../env";
 
 export class MovementFullnodeConstruct extends Construct {
   public readonly namespace: Namespace;
@@ -17,16 +14,11 @@ export class MovementFullnodeConstruct extends Construct {
   public readonly statefulSet: StatefulSet;
   public readonly service: Service;
 
-  constructor(scope: Construct, id: string, envInfo: EnvInfo) {
+  constructor(scope: Construct, id: string, envInfo: EnvInfo, k8sProvider: KubernetesProvider) {
     super(scope, id);
 
     // Create a unique prefix for all resources in this construct
     const resourcePrefix = `movement-${envInfo.networkName}`;
-
-    // Kubernetes Provider
-    new KubernetesProvider(this, `${resourcePrefix}-kubernetes-provider`, {
-      configPath: "~/.kube/config",
-    });
 
     // Namespace
     this.namespace = new Namespace(this, `${resourcePrefix}-namespace`, {
@@ -38,64 +30,7 @@ export class MovementFullnodeConstruct extends Construct {
           cluster: "local",
         },
       },
-    });
-
-    // ServiceAccount
-    const serviceAccount = new ServiceAccount(this, `${resourcePrefix}-service-account`, {
-      metadata: {
-        name: `movement-${envInfo.networkName}`,
-        namespace: envInfo.namespace,
-        labels: {
-          app: "movement",
-          environment: "staging",
-          cluster: "local",
-        },
-      },
-    });
-
-    // Role for job watching
-    const role = new Role(this, `${resourcePrefix}-role`, {
-      metadata: {
-        name: `movement-${envInfo.networkName}-job-watcher`,
-        namespace: envInfo.namespace,
-        labels: {
-          app: "movement",
-          environment: "staging",
-          cluster: "local",
-        },
-      },
-      rule: [
-        {
-          apiGroups: ["batch"],
-          resources: ["jobs"],
-          verbs: ["get", "watch", "list"],
-        },
-      ],
-    });
-
-    // RoleBinding
-    new RoleBinding(this, `${resourcePrefix}-role-binding`, {
-      metadata: {
-        name: `movement-${envInfo.networkName}-job-watcher`,
-        namespace: envInfo.namespace,
-        labels: {
-          app: "movement",
-          environment: "staging",
-          cluster: "local",
-        },
-      },
-      roleRef: {
-        apiGroup: "rbac.authorization.k8s.io",
-        kind: "Role",
-        name: role.metadata.name,
-      },
-      subject: [
-        {
-          kind: "ServiceAccount",
-          name: serviceAccount.metadata.name,
-          namespace: envInfo.namespace,
-        },
-      ],
+      provider: k8sProvider,
     });
 
     // PVC
@@ -118,6 +53,7 @@ export class MovementFullnodeConstruct extends Construct {
         },
         ...(envInfo.storageClass && { storageClassName: envInfo.storageClass }),
       },
+      provider: k8sProvider,
     });
 
     // ConfigMap for config.json
@@ -128,7 +64,6 @@ export class MovementFullnodeConstruct extends Construct {
         labels: {
           app: "movement",
           environment: "staging",
-          cluster: "local",
         },
       },
       data: {
@@ -140,6 +75,7 @@ export class MovementFullnodeConstruct extends Construct {
           "metrics_port": 30735
         }`,
       },
+      provider: k8sProvider,
     });
 
     // ConfigMap for restore script
@@ -150,7 +86,6 @@ export class MovementFullnodeConstruct extends Construct {
         labels: {
           app: "movement",
           environment: "staging",
-          cluster: "local",
         },
       },
       data: {
@@ -178,6 +113,7 @@ fi
 
 echo "Restore completed!"`,
       },
+      provider: k8sProvider,
     });
 
     // StatefulSet
@@ -188,7 +124,6 @@ echo "Restore completed!"`,
         labels: {
           app: "movement",
           environment: "staging",
-          cluster: "local",
         },
       },
       spec: {
@@ -198,7 +133,6 @@ echo "Restore completed!"`,
           matchLabels: {
             app: "movement",
             environment: "staging",
-            cluster: "local",
           },
         },
         template: {
@@ -206,11 +140,9 @@ echo "Restore completed!"`,
             labels: {
               app: "movement",
               environment: "staging",
-              cluster: "local",
             },
           },
           spec: {
-            serviceAccountName: serviceAccount.metadata.name,
             initContainer: [
               {
                 name: "check-movement-empty",
@@ -279,6 +211,7 @@ echo "Restore completed!"`,
           },
         },
       },
+      provider: k8sProvider,
     });
 
     // Service
@@ -289,14 +222,12 @@ echo "Restore completed!"`,
         labels: {
           app: "movement",
           environment: "staging",
-          cluster: "local",
         },
       },
       spec: {
         selector: {
           app: "movement",
           environment: "staging",
-          cluster: "local",
         },
         port: [
           { name: "api", port: 30731, targetPort: "30731" },
@@ -305,6 +236,7 @@ echo "Restore completed!"`,
         ],
         type: "ClusterIP",
       },
+      provider: k8sProvider,
     });
 
     // Terraform Outputs

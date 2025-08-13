@@ -22,3 +22,18 @@ pnpm run destroy:devnet
 pnpm run destroy:mainnet
 ```
 
+## Local development
+
+Make sure contexts are created. 
+
+```bash
+# Create testnet context
+kubectl config set-context movement-testnet-cluster --cluster=default --user=default
+
+# Create devnet context  
+kubectl config set-context movement-devnet-cluster --cluster=default --user=default
+
+# Create mainnet context
+kubectl config set-context movement-mainnet-cluster --cluster=default --user=default
+```
+
